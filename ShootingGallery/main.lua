@@ -1,5 +1,6 @@
 --[[
     Shooting gallery game
+    @credited to Lua Programming and Game Development with LÖVE (udemy)
 ]]
 
 function love.load()
