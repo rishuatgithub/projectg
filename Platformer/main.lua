@@ -1,4 +1,3 @@
-local anim8 = require "platformer.libraries.anim8.anim8"
 --[[
     Platform game with animation and love
     @credited to Lua Programming and Game Development with LÖVE (udemy)
@@ -8,6 +7,7 @@ function love.load()
     -- import the windfield and animation lib
     anim8 = require 'libraries.anim8.anim8'
     wf = require 'libraries.windfield.windfield'
+    
     world = wf.newWorld(0,800, false)
     world:setQueryDebugDrawing(true)
 
@@ -30,6 +30,8 @@ function love.load()
     player:setFixedRotation(true)
     player.speed=240
     player.animation = animations.idle
+    player.isMoving = false
+    player.direction = 1
 
     platform = world:newRectangleCollider(250,400,300,100,{collision_class='Platform'})
     platform:setType('static')
@@ -43,17 +45,28 @@ function love.update(dt)
     world:update(dt)
 
     if player.body then
+        player.isMoving = false
         local px, py = player:getPosition()
         if love.keyboard.isDown('right') then
             player:setX(px + player.speed*dt)
+            player.isMoving = true
+            player.direction = 1
         end
         if love.keyboard.isDown('left') then
             player:setX(px - player.speed*dt)
+            player.isMoving = true
+            player.direction = -1
         end
 
         if player:enter('Danger') then
             player:destroy()
         end
+    end
+
+    if player.isMoving then
+        player.animation = animations.run
+    else
+        player.animation = animations.idle
     end
 
     player.animation:update(dt)
@@ -64,7 +77,7 @@ function love.draw()
     world:draw()
 
     local px, py = player:getPosition()
-    player.animation:draw(sprites.playerSheet, px, py, nil, 0.25, 0.25, 130, 300)
+    player.animation:draw(sprites.playerSheet, px, py, nil, 0.25 * player.direction, 0.25, 130, 300)
 end
 
 function love.keypressed(key)
